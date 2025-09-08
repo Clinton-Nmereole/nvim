@@ -446,7 +446,7 @@ local M = {
 		ft = "astro",
 	},
 
-	--Zig language support
+	--[[Zig language support
 	{
 		"ziglang/zig.vim",
 		event = { "BufReadPre", "BufRead", "BufNewFile" },
@@ -455,7 +455,8 @@ local M = {
 		end,
 		ft = "zig",
 		lazy = false,
-	},
+	},]]
+	--
 
 	-- Spectre search and replace
 	{
@@ -625,6 +626,31 @@ local M = {
 
 	--LspKind
 	{ "onsails/lspkind.nvim" },
+
+	-- Code COmpanion AI
+	{
+		"olimorris/codecompanion.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+			{
+				"saghen/blink.cmp",
+				opts = {
+					sources = {
+						default = { "codecompanion" },
+						providers = {
+							codecompanion = {
+								name = "CodeCompanion",
+								module = "codecompanion.providers.completion.blink",
+								enabled = true,
+							},
+						},
+					},
+				},
+			},
+		},
+		config = true,
+	},
 
 	--Themes
 	themes,
