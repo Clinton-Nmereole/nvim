@@ -1,3 +1,4 @@
+require("codesensei.core.core_options")
 require("codesensei.lazy")
 require("codesensei.core")
 require("codesensei.commands")

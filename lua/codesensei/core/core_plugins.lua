@@ -472,6 +472,17 @@ local M = {
 		lazy = false,
 	},
 
+	-- add this to the file where you setup your other plugins:
+	{
+		"monkoose/neocodeium",
+		event = "VeryLazy",
+		config = function()
+			local neocodeium = require("neocodeium")
+			neocodeium.setup()
+			vim.keymap.set("i", "<A-f>", neocodeium.accept)
+		end,
+	},
+
 	--[[Hardtime for vim suggestions
 	{
 		"m4xshen/hardtime.nvim",
@@ -627,7 +638,7 @@ local M = {
 	--LspKind
 	{ "onsails/lspkind.nvim" },
 
-	-- Code COmpanion AI
+	--[[ Code COmpanion AI
 	{
 		"olimorris/codecompanion.nvim",
 		dependencies = {
@@ -651,6 +662,8 @@ local M = {
 		},
 		config = true,
 	},
+    ]]
+	--
 
 	--Themes
 	themes,

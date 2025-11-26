@@ -17,12 +17,4 @@ opt.updatetime = 200
 opt.undofile = true
 opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 
---Set lualine as statusline
-require('lualine').setup {
-    options = {
-        icons_enabled = true,
-        theme = vim.g.colorscheme,
-        component_separators = '|',
-        section_separators = '',
-    }
-}
+

@@ -83,13 +83,16 @@ lsp.format_on_save({
 })
 
 -- (Optional) Configure lua language server for neovim
-require("lspconfig").lua_ls.setup(lsp.nvim_lua_ls())
+vim.lsp.config("lua_ls", lsp.nvim_lua_ls())
+vim.lsp.enable("lua_ls")
+--vim.lsp.config("lua_ls").setup(lsp.nvim_lua_ls())
 
-require("lspconfig").zls.setup({
+vim.lsp.config("zls", {
 	enable_autofix = true,
 })
+vim.lsp.enable("zls")
 
-require("lspconfig").gopls.setup({
+vim.lsp.config("gopls", {
 	on_attach = lsp.on_attach(),
 	cmd = { "gopls" },
 	filetypes = { "go", "gomod", "gowork", "gotmpl" },
@@ -99,18 +102,21 @@ require("lspconfig").gopls.setup({
 		},
 	},
 })
+vim.lsp.enable("gopls")
 
-require("lspconfig").html.setup({
+vim.lsp.config("html", {
 	on_attach = lsp.on_attach,
 	--cmd = { "html-ls" },
 	filetypes = { "html" },
 })
+vim.lsp.enable("html")
 
-require("lspconfig").ols.setup({
+vim.lsp.config("ols", {
 	on_attach = lsp.on_attach(),
 	cmd = { "ols" },
 	filetypes = { "odin" },
 })
+vim.lsp.enable("ols")
 
 --local cmp = require("cmp")
 --local cmp_action = require("lsp-zero").cmp_action()
