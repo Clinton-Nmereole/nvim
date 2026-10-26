@@ -626,23 +626,6 @@ local M = {
 		opts = function() return require("codesensei.core.plugin_configs.oil") end,
 	},
 
-	-- ── fff.nvim — fast fuzzy finder (Rust-powered) ─────────────────
-	{
-		"dmtrKovalenko/fff.nvim",
-		build = function()
-			require("fff.download").download_or_build_binary()
-		end,
-		lazy = false, -- lazy-initialises itself, but needs to load for indexing
-		keys = {
-			{ "<leader>ff", function() require("fff").find_files() end, desc = "Find Files" },
-			{ "<leader>fg", function() require("fff").live_grep() end, desc = "Live Grep" },
-			{ "<leader>fz", function() require("fff").live_grep({ grep = { modes = { "fuzzy", "plain" } } }) end, desc = "Fuzzy Grep" },
-			{ "<leader>fb", function() require("fff").find_files() end, desc = "Buffers (Files)" },
-			{ "<leader>fc", function() require("fff").live_grep({ query = vim.fn.expand("<cword>") }) end, desc = "Grep Cword" },
-		},
-		opts = function() return require("codesensei.core.plugin_configs.fff") end,
-	},
-
 	-- ── Showkeys — keypress display ───────────────────────────────
 	{
 		"nvzone/showkeys",

@@ -148,28 +148,18 @@ keyset("n", "<leader>te", ":TSEnable highlight<CR>", { desc = "Enable Treesitter
 --   <C-r>     -> Refresh
 
 -- ============================================================================
--- FFF.NVIM -- Fast fuzzy finder (Rust-powered)
+-- TELESCOPE -- File and text navigation
 -- ============================================================================
--- Global keymaps (set in core_plugins.lua lazy spec keys):
---   <leader>ff -> Find files
---   <leader>fg -> Live grep
---   <leader>fz -> Fuzzy grep
---   <leader>fb -> Buffers (files)
+-- Defined once in plugin_configs/telescope.lua:
+--   <leader>ff -> Find project files
+--   <leader>fg -> Live grep across project files
+--   <leader>fb -> Open buffers (including unsaved buffers)
 --   <leader>fc -> Grep word under cursor
--- Picker keymaps (set in plugin_configs/fff.lua):
---   <Esc>     -> Close picker
---   <CR>      -> Select / open
---   <C-s>     -> Open in horizontal split
---   <C-v>     -> Open in vertical split
---   <C-t>     -> Open in new tab
---   <C-u>     -> Scroll preview up
---   <C-d>     -> Scroll preview down
---   <Tab>     -> Toggle select (multi-select)
---   <C-q>     -> Send selected to quickfix
---   <S-Tab>   -> Cycle grep mode (plain -> regex -> fuzzy)
---   <C-Up>    -> Previous query
---   <leader>l -> Focus result list
---   <leader>p -> Focus preview pane
+--   <leader>fz -> Fuzzy search lines in the current buffer
+--   <leader>fh -> Search help tags
+--   <leader>fn -> Find Neovim config files from any project
+-- Picker keys: <CR> open, <C-x> horizontal split, <C-v> vertical split,
+-- <C-t> new tab, <C-n>/<C-p> move, <C-q> send results to quickfix.
 
 -- ============================================================================
 -- CONFORM.NVIM -- Formatter (format-on-save: automatic)
