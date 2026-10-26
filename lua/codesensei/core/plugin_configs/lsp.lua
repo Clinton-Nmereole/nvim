@@ -1,10 +1,36 @@
--- Add cmp_nvim_lsp capabilities settings to lspconfig
--- This should be executed before you configure any language server
-local lspconfig_defaults = require("lspconfig").util.default_config
-lspconfig_defaults.capabilities =
-	vim.tbl_deep_extend("force", lspconfig_defaults.capabilities, require("cmp_nvim_lsp").default_capabilities())
+-- ============================================================================
+-- LSP Configuration — Neovim 0.11+ vim.lsp.config API
+-- Uses blink.cmp for completions (replaces lsp-zero + nvim-cmp).
+-- Format-on-save is handled by conform.nvim.
+--
+-- IMPORTANT: Server configs are deferred via M.setup() so blink.cmp
+-- capabilities are set before any LSP server is enabled.
+-- M.setup() is called from codesensei.core.plugin_configs.blink after blink.setup().
+-- ============================================================================
 
-local lsp = require("lsp-zero").preset({})
+local M = {}
+
+-- ── Mason LSP auto-install ────────────────────────────────────────────
+require("mason-lspconfig").setup({
+	ensure_installed = {
+		"lua_ls",
+		"rust_analyzer",
+		"gopls",
+		"ts_ls",          -- TypeScript (formerly tsserver in mason)
+		"clangd",
+		"pyright",
+		"cssls",
+		"zls",
+		"astro",
+		"svelte",
+		"tailwindcss",
+		"ruff",
+		"html",
+		"ols",
+	},
+})
+
+-- ── Mason DAP (debuggers) ─────────────────────────────────────────────
 require("mason-nvim-dap").setup({
 	ensure_installed = {
 		"codelldb",
@@ -13,10 +39,12 @@ require("mason-nvim-dap").setup({
 	},
 })
 
+-- ── Mason null-ls bridge (formatters / linters outside LSP) ───────────
 require("mason-null-ls").setup({
-	ensure_installed = { "stylua", "jq", "gopls", "zls" },
+	ensure_installed = { "stylua", "jq" },
 })
 
+-- ── DAP configuration ─────────────────────────────────────────────────
 local dap = require("dap")
 dap.configurations.zig = {
 	{
@@ -40,121 +68,101 @@ dap.adapters.codelldb = {
 	},
 }
 
-lsp.ensure_installed({
-	"lua_ls",
-	"rust_analyzer",
-	"gopls",
-	"tsserver",
-	"clangd",
-	"pyright",
-	"cssls",
-	"zls",
-	"astro",
-	"svelte",
-	"tailwindcss",
-	"ruff",
-	"html",
-	"ols",
+-- ── Global LSP keymaps (applied to EVERY LSP server via LspAttach) ────
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+	callback = function(ev)
+		local client = vim.lsp.get_client_by_id(ev.data.client_id)
+		if client == nil then
+			return
+		end
+		local bufnr = ev.buf
+		local opts = { buffer = bufnr, silent = true }
+
+		-- Navigation
+		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+		vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+		vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+		vim.keymap.set("n", "go", vim.lsp.buf.type_definition, opts)
+		vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+
+		-- Info
+		vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+
+		-- Workspace actions
+		vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+		vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+		vim.keymap.set("n", "<leader>f", function()
+			vim.lsp.buf.format({ async = true })
+		end, opts)
+
+		-- Diagnostics navigation
+		vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+		vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+
+		-- Highlight references on cursor hold
+		if client.server_capabilities.documentHighlightProvider then
+			vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+				buffer = bufnr,
+				callback = vim.lsp.buf.document_highlight,
+			})
+			vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+				buffer = bufnr,
+				callback = vim.lsp.buf.clear_references,
+			})
+		end
+	end,
 })
 
-lsp.on_attach(function(client, bufnr)
-	-- see :help lsp-zero-keybindings
-	-- to learn the available actions
-	lsp.default_keymaps({ buffer = bufnr })
-end)
-
-lsp.format_on_save({
-	enable = true,
-	format_opts = {
-		async = false,
-		timeout_ms = 10000,
-	},
-	servers = {
-		["rust_analyzer"] = { "rust" },
-		["gopls"] = { "go" },
-		["goimports"] = { "go" },
-		["black"] = { "python" },
-		--    ["null_ls"] = { "python" },
-		["zls"] = { "zig" },
-		["prettier"] = { "html", "js", "jsx", "ts", "tsx" },
-		["prettierd"] = { "html", "js", "jsx", "ts", "tsx" },
-		["ols"] = { "odin" },
-	},
-})
-
--- (Optional) Configure lua language server for neovim
-vim.lsp.config("lua_ls", lsp.nvim_lua_ls())
-vim.lsp.enable("lua_ls")
---vim.lsp.config("lua_ls").setup(lsp.nvim_lua_ls())
-
-vim.lsp.config("zls", {
-	enable_autofix = true,
-})
-vim.lsp.enable("zls")
-
-vim.lsp.config("gopls", {
-	on_attach = lsp.on_attach(),
-	cmd = { "gopls" },
-	filetypes = { "go", "gomod", "gowork", "gotmpl" },
-	settings = {
-		gopls = {
-			completeUnimported = true,
-		},
-	},
-})
-vim.lsp.enable("gopls")
-
-vim.lsp.config("html", {
-	on_attach = lsp.on_attach,
-	--cmd = { "html-ls" },
-	filetypes = { "html" },
-})
-vim.lsp.enable("html")
-
-vim.lsp.config("ols", {
-	on_attach = lsp.on_attach(),
-	cmd = { "ols" },
-	filetypes = { "odin" },
-})
-vim.lsp.enable("ols")
-
---local cmp = require("cmp")
---local cmp_action = require("lsp-zero").cmp_action()
---local cmp_format = require("lsp-zero").cmp_format({ details = true })
-
---[[cmp.setup({
-	--Sources
-	sources = {
-		{ name = "nvim_lsp" },
-		{ name = "luasnip" },
-		{ name = "buffer" },
-	},
-
-	mapping = {
-		--Enter key confirms completion
-		["<CR>"] = cmp.mapping.confirm({ select = false }),
-		--Ctrl + Space to trigger completion menu
-		["<C-Space>"] = cmp.mapping.complete(),
-		["<Tab>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-
-		["<C-f>"] = cmp_action.luasnip_jump_forward(),
-		["<C-b>"] = cmp_action.luasnip_jump_backward(),
-		["<S-Tab>"] = cmp_action.luasnip_supertab(),
-	},
-
-	--Snippets
-	snippet = {
-		expand = function(args)
-			vim.snippet.expand(args.body)
-			require("luasnip").lsp_expand(args.body)
-			-- require("nvim_lsp").lsp_expand(args.body)
+-- ── M.setup() — called after blink.cmp is ready ───────────────────────
+function M.setup()
+	-- Lua (lua_ls)
+	vim.lsp.config("lua_ls", {
+		on_init = function(client)
+			if client.workspace_folders then
+				local path = client.workspace_folders[1].name
+				if vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc") then
+					return
+				end
+			end
+			client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+				runtime = { version = "LuaJIT" },
+				workspace = {
+					checkThirdParty = false,
+					library = { vim.env.VIMRUNTIME },
+				},
+			})
 		end,
-	},
+		settings = { Lua = {} },
+	})
+	vim.lsp.enable("lua_ls")
 
-	-- window
-	window = {
-		completion = cmp.config.window.bordered(),
-		documentation = cmp.config.window.bordered(),
-	},
-})]]
---
+	-- Zig (zls)
+	vim.lsp.config("zls", {
+		settings = { enable_autofix = true },
+	})
+	vim.lsp.enable("zls")
+
+	-- Go (gopls)
+	vim.lsp.config("gopls", {
+		filetypes = { "go", "gomod", "gowork", "gotmpl" },
+		settings = {
+			gopls = { completeUnimported = true },
+		},
+	})
+	vim.lsp.enable("gopls")
+
+	-- HTML
+	vim.lsp.config("html", {
+		filetypes = { "html" },
+	})
+	vim.lsp.enable("html")
+
+	-- Odin (ols)
+	vim.lsp.config("ols", {
+		filetypes = { "odin" },
+	})
+	vim.lsp.enable("ols")
+end
+
+return M

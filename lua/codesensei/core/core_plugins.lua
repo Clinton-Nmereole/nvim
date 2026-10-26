@@ -1,9 +1,65 @@
 local themes = require("codesensei.core.themes")
 local M = {
+	--Pi agent plugin
+	{
+		"pablopunk/pi.nvim",
+		config = function()
+			require("pi").setup()
+		end,
+	},
+
+	{
+		"carderne/pi-nvim",
+		config = function()
+			require("pi-nvim").setup()
+		end,
+	},
+	--[[{
+		"aliou/nvim-pi",
+		config = function()
+			require("pi-nvim").setup({
+				-- Seamless: open in a vertical split (like a chat panel)
+				auto_start = true,
+				data_dir = nil,
+				win = {
+					layout = "auto", -- "vertical", "horizontal", "float", or "auto"
+					width_threshold = 150,
+					width = 80,
+					height = 20,
+					focus_source_on_stopinsert = true, -- switch to source window on exiting terminal mode
+					keys = {
+						close = { "<C-q>", mode = "n", desc = "Close Pi" },
+						stopinsert = { "<C-q>", mode = "t", desc = "Exit terminal mode" },
+						suspend = { "<C-z>", mode = "t", desc = "Suspend Neovim" },
+						picker = { "<C-Space>", mode = "t", desc = "Open context picker" },
+					},
+				},
+			})
+		end,
+	},
+    ]]
+	--
+
+	-- Mini Nvim
+	{
+		"echasnovski/mini.nvim",
+		version = false,
+		config = function()
+			local mini_config = require("codesensei.core.plugin_configs.mini")
+			require("mini.ai").setup(mini_config.ai)
+			require("mini.surround").setup(mini_config.surround)
+			require("mini.pairs").setup(mini_config.pairs)
+			require("mini.comment").setup(mini_config.comment)
+			require("mini.indentscope").setup(mini_config.indentscope)
+			require("mini.cursorword").setup(mini_config.cursorword)
+			require("mini.trailspace").setup(mini_config.trailspace)
+		end,
+	},
 	--Telescope
 	{
 		"nvim-telescope/telescope.nvim",
-		tag = "0.1.4",
+		--tag = "0.1.4",
+		branch = "master",
 		dependencies = "nvim-lua/plenary.nvim",
 		config = function()
 			require("telescope").setup()
@@ -11,18 +67,17 @@ local M = {
 	},
 
 	--Treesitter stuff
+
 	{
 		"nvim-treesitter/nvim-treesitter",
 		--event = { "BufReadPre", "BufRead", "BufNewFile" },
 		--cmd = { ":TSInstall", ":TSModuleInfo", ":TSBufEnable", ":TSBufDisable" },
-		build = { ":TSUpdate", ":TSInstall zig", ":TSEnable highlight zig" },
+		branch = "main",
+		build = { ":TSUpdate" },
 		--run = "TSUpdate",
 		config = function()
 			require("codesensei.core.plugin_configs.treesitter")
 		end,
-	},
-	{
-		"nvim-treesitter/playground",
 	},
 
 	--undotree
@@ -51,135 +106,101 @@ local M = {
 		lazy = true,
 	},
 
-	--LSP Zero
+	-- LSP — core server protocol support
 	{
-		"VonHeikemen/lsp-zero.nvim",
-		branch = "v2.x",
+		"neovim/nvim-lspconfig",
+		event = { "BufReadPre", "BufNewFile" },
+	},
+
+	-- Mason — LSP / DAP / linter / formatter installer
+	{
+		"williamboman/mason.nvim",
+		opts = {},
+	},
+
+	-- Auto-install LSP servers via Mason
+	{
+		"williamboman/mason-lspconfig.nvim",
 		dependencies = {
-			--LSP support
+			"williamboman/mason.nvim",
 			"neovim/nvim-lspconfig",
-
-			{
-				"nvimtools/none-ls.nvim",
-			},
-
-			--null-ls
-			"jay-babu/mason-null-ls.nvim",
-
-			--Autocompletionsplugins
-			"hrsh7th/nvim-cmp",
-			"hrsh7th/cmp-nvim-lsp",
-			"hrsh7th/cmp-buffer",
-			"hrsh7th/cmp-path",
-			"saadparwaiz1/cmp_luasnip",
-			"hrsh7th/cmp-nvim-lua",
-
-			--Snippets
-			"L3MON4D3/LuaSnip",
-			"rafamadriz/friendly-snippets",
-			"honza/vim-snippets",
 		},
 	},
 
+	-- None-ls — null-ls fork (formatting & diagnostics outside LSP)
+	{
+		"nvimtools/none-ls.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = function()
+			require("null-ls").setup(require("codesensei.core.plugin_configs.null-ls"))
+		end,
+	},
+
+	-- Mason null-ls bridge — install none-ls tools via Mason
+	{
+		"jay-babu/mason-null-ls.nvim",
+		dependencies = {
+			"williamboman/mason.nvim",
+			"nvimtools/none-ls.nvim",
+		},
+	},
+
+	-- Snippets
+	{
+		"L3MON4D3/LuaSnip",
+		lazy = true,
+	},
+	{
+		"rafamadriz/friendly-snippets",
+		lazy = true,
+	},
+
+	-- Minuet — AI code completions via LLM (OpenRouter DeepSeek free tier)
+	{
+		"milanglacier/minuet-ai.nvim",
+		lazy = true,
+		config = function()
+			require("minuet").setup(require("codesensei.core.plugin_configs.minuet"))
+		end,
+	},
+
+	-- Blink.cmp — modern completion engine (replaces nvim-cmp)
 	{
 		"saghen/blink.cmp",
-		-- optional: provides snippets for the snippet source
-		dependencies = { "rafamadriz/friendly-snippets" },
-
-		-- use a release tag to download pre-built binaries
 		version = "1.*",
-		-- AND/OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
-		-- build = 'cargo build --release',
-		-- If you use nix, you can build from source using latest nightly rust with:
-		-- build = 'nix run .#build-plugin',
-
-		---@module 'blink.cmp'
-		---@type blink.cmp.Config
-		opts = {
-			-- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
-			-- 'super-tab' for mappings similar to vscode (tab to accept)
-			-- 'enter' for enter to accept
-			-- 'none' for no mappings
-			--
-			-- All presets have the following mappings:
-			-- C-space: Open menu or open docs if already open
-			-- C-n/C-p or Up/Down: Select next/previous item
-			-- C-e: Hide menu
-			-- C-k: Toggle signature help (if signature.enabled = true)
-			--
-			-- See :h blink-cmp-config-keymap for defining your own keymap
-			keymap = {
-				preset = "default",
-				["<CR>"] = { "accept", "fallback" },
-				["<Tab>"] = { "select_next", auto_insert = true },
-			},
-
-			appearance = {
-				-- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
-				-- Adjusts spacing to ensure icons are aligned
-				nerd_font_variant = "fira",
-			},
-
-			-- (Default) Only show the documentation popup when manually triggered
-			completion = {
-				documentation = { auto_show = true },
-				menu = {
-					draw = {
-						components = {
-							kind_icon = {
-								text = function(ctx)
-									local icon = ctx.kind_icon
-									if vim.tbl_contains({ "Path" }, ctx.source_name) then
-										local dev_icon, _ = require("nvim-web-devicons").get_icon(ctx.label)
-										if dev_icon then
-											icon = dev_icon
-										end
-									else
-										icon = require("lspkind").symbolic(ctx.kind, {
-											mode = "symbol",
-										})
-									end
-
-									return icon .. ctx.icon_gap
-								end,
-
-								-- Optionally, use the highlight groups from nvim-web-devicons
-								-- You can also add the same function for `kind.highlight` if you want to
-								-- keep the highlight groups in sync with the icons.
-								highlight = function(ctx)
-									local hl = ctx.kind_hl
-									if vim.tbl_contains({ "Path" }, ctx.source_name) then
-										local dev_icon, dev_hl = require("nvim-web-devicons").get_icon(ctx.label)
-										if dev_icon then
-											hl = dev_hl
-										end
-									end
-									return hl
-								end,
-							},
-						},
-					},
-					border = "rounded",
-				},
-			},
-
-			-- Default list of enabled providers defined so that you can extend it
-			-- elsewhere in your config, without redefining it, due to `opts_extend`
-			sources = {
-				default = { "lsp", "path", "snippets", "buffer" },
-			},
-
-			-- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
-			-- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
-			-- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
-			--
-			-- See the fuzzy documentation for more information
-			fuzzy = { implementation = "prefer_rust_with_warning" },
+		dependencies = {
+			"rafamadriz/friendly-snippets",
+			"L3MON4D3/LuaSnip",
+			"milanglacier/minuet-ai.nvim", -- AI completions source
 		},
-		opts_extend = { "sources.default" },
+		config = function()
+			require("codesensei.core.plugin_configs.blink")
+		end,
 	},
 
-	--None-ls
+	-- Sidekick — AI assistant powered by Codex CLI (included with ChatGPT Pro)
+	{
+		"folke/sidekick.nvim",
+		dependencies = {
+			"folke/snacks.nvim",
+			"ibhagwan/fzf-lua",
+		},
+		opts = function() return require("codesensei.core.plugin_configs.sidekick") end,
+		cmd = {
+			"Sidekick",
+			"SidekickChat",
+			"SidekickReview",
+			"SidekickAgent",
+			"SidekickInline",
+			"SidekickCode",
+		},
+		keys = {
+			{ "<leader>ak", "<cmd>Sidekick<CR>", desc = "Sidekick: Ask" },
+			{ "<leader>ac", "<cmd>SidekickChat<CR>", desc = "Sidekick: Chat" },
+			{ "<leader>ar", "<cmd>SidekickReview<CR>", desc = "Sidekick: Review" },
+			{ "<leader>aa", "<cmd>SidekickAgent<CR>", desc = "Sidekick: Agent" },
+		},
+	},
 
 	--Lsp-Lines
 	{
@@ -194,16 +215,7 @@ local M = {
 		end,
 	},
 
-	--[[Mason-lspconfig
-	{
-		"mason-org/mason-lspconfig.nvim",
-		opts = {},
-		dependencies = {
-			{ "mason-org/mason.nvim", opts = {} },
-			"neovim/nvim-lspconfig",
-		},
-	},]]
-	--
+
 
 	--indent blankline
 	{
@@ -275,12 +287,8 @@ local M = {
 			handlers = {},
 		},
 	},
-	{
-		"williamboman/mason.nvim",
-		opts = {
-			ensure_installed = { "gopls" },
-		},
-	},
+	-- Mason handles all LSP/DAP/linter installations (configured in lsp.lua & dap configs)
+
 	--Python debugger
 	{
 		"mfussenegger/nvim-dap-python",
@@ -311,7 +319,9 @@ local M = {
 	{
 		"rcarriga/nvim-notify",
 		config = function()
-			require("notify")
+			require("notify").setup({
+				background_colour = "#000000",
+			})
 		end,
 		init = function()
 			vim.notify = require("notify")
@@ -327,9 +337,7 @@ local M = {
 		},
 		config = function(_, opts)
 			require("nvim-autopairs").setup(opts)
-			--setup cmp for autopairs
-			local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-			require("cmp").event:on("confirm_done", cmp_autopairs.on_confirm_done())
+			-- Blink autopairs integration is handled in codesensei.core.plugin_configs.blink
 		end,
 	},
 
@@ -363,7 +371,6 @@ local M = {
 					override = {
 						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
 						["vim.lsp.util.stylize_markdown"] = true,
-						["cmp.entry.get_documentation"] = true,
 					},
 				},
 				presets = {
@@ -416,7 +423,7 @@ local M = {
 	{
 		"simrat39/rust-tools.nvim",
 		ft = "rust",
-		dependencies = "VonHeikemen/lsp-zero.nvim",
+		dependencies = "neovim/nvim-lspconfig",
 		config = function()
 			require("rust-tools").setup()
 		end,
@@ -466,22 +473,25 @@ local M = {
 		end,
 	},
 
-	--Codeium for AI suggestions
+	--[[Codeium for AI suggestions
 	{
 		"Exafunction/codeium.vim",
 		lazy = false,
-	},
+	},]]
+	--
+	--[[
 
-	-- add this to the file where you setup your other plugins:
 	{
 		"monkoose/neocodeium",
 		event = "VeryLazy",
 		config = function()
 			local neocodeium = require("neocodeium")
 			neocodeium.setup()
-			vim.keymap.set("i", "<A-f>", neocodeium.accept)
+			vim.keymap.set("i", "<Tab>", neocodeium.accept)
 		end,
 	},
+    ]]
+	--
 
 	--[[Hardtime for vim suggestions
 	{
@@ -548,7 +558,7 @@ local M = {
 		"tribela/vim-transparent",
 	},
 
-	--Neorg plugin
+	--[[Neorg plugin
 	{
 		"nvim-neorg/neorg",
 		run = ":Neorg sync-parsers",
@@ -573,7 +583,8 @@ local M = {
 			})
 		end,
 		dependencies = "nvim-lua/plenary.nvim",
-	},
+	},]]
+	--
 
 	-- Trouble
 	{
@@ -599,46 +610,123 @@ local M = {
 	--colorizer
 	{
 		"norcalli/nvim-colorizer.lua",
-		config = function()
-			require("colorizer").setup()
-		end,
+		opts = function() return require("codesensei.core.plugin_configs.colorizer") end,
 	},
 
 	--Conform
 	{
 		"stevearc/conform.nvim",
-		opts = {
-			formatters_by_ft = {
-				lua = { "stylua" },
-				-- Conform will run multiple formatters sequentially
-				python = { "isort", "black" },
-				-- Use a sub-list to run only the first available formatter
-				javascript = { "prettierd", "prettier", stop_after_first = true },
-				go = { "gofumpt", "goimports", "goimports-reviser" },
-				html = { "prettier", "prettierd" },
-			},
-
-			format_on_save = {
-				-- These options will be passed to conform.format()
-				timeout_ms = 500,
-				lsp_fallback = true,
-			},
-		},
+		opts = function() return require("codesensei.core.plugin_configs.conform") end,
 	},
 
 	{
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 	},
 
+	-- ── Oil.nvim — file explorer ───────────────────────────────────
+	{
+		"stevearc/oil.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		cmd = "Oil",
+		keys = {
+			{ "<leader>e", "<cmd>Oil<CR>", desc = "Oil Explorer" },
+			{ "-", "<cmd>Oil<CR>", desc = "Oil (parent dir)" },
+		},
+		opts = function() return require("codesensei.core.plugin_configs.oil") end,
+	},
+
+	-- ── fff.nvim — fast fuzzy finder (Rust-powered) ─────────────────
+	{
+		"dmtrKovalenko/fff.nvim",
+		build = function()
+			require("fff.download").download_or_build_binary()
+		end,
+		lazy = false, -- lazy-initialises itself, but needs to load for indexing
+		keys = {
+			{ "<leader>ff", function() require("fff").find_files() end, desc = "Find Files" },
+			{ "<leader>fg", function() require("fff").live_grep() end, desc = "Live Grep" },
+			{ "<leader>fz", function() require("fff").live_grep({ grep = { modes = { "fuzzy", "plain" } } }) end, desc = "Fuzzy Grep" },
+			{ "<leader>fb", function() require("fff").find_files() end, desc = "Buffers (Files)" },
+			{ "<leader>fc", function() require("fff").live_grep({ query = vim.fn.expand("<cword>") }) end, desc = "Grep Cword" },
+		},
+		opts = function() return require("codesensei.core.plugin_configs.fff") end,
+	},
+
+	-- ── Showkeys — keypress display ───────────────────────────────
+	{
+		"nvzone/showkeys",
+		cmd = "ShowkeysToggle",
+		event = "VeryLazy",
+		opts = function() return require("codesensei.core.plugin_configs.showkeys") end,
+		config = function(_, opts)
+			require("showkeys").setup(opts)
+			-- Insert mode can close the overlay before its timeout callback runs.
+			-- Guard upstream cleanup so a second close cannot redraw a missing window.
+			local state = require("showkeys.state")
+			local utils = require("showkeys.utils")
+			local clear_and_close = utils.clear_and_close
+			utils.clear_and_close = function()
+				if not state.win or not vim.api.nvim_win_is_valid(state.win) then
+					state.keys = {}
+					state.win = nil
+					return
+				end
+				clear_and_close()
+			end
+			-- Auto-enable on startup so you don't have to toggle every session
+			vim.defer_fn(function()
+				pcall(vim.cmd.ShowkeysToggle)
+			end, 100)
+		end,
+	},
+
+	-- ── Gitsigns — git gutter signs ───────────────────────────────
+	{
+		"lewis6991/gitsigns.nvim",
+		event = "BufReadPre",
+		opts = function() return require("codesensei.core.plugin_configs.gitsigns") end,
+	},
+
+	-- ── Sidekick.nvim — AI assistant with Codex CLI ───────────────
+	{
+		"folke/sidekick.nvim",
+		dependencies = {
+			"folke/snacks.nvim", -- optional: better prompt/tool picker
+		},
+		event = "VeryLazy",
+		keys = {
+			{ "<c-.>", function() require("sidekick.cli").focus() end, mode = { "n", "t", "i" }, desc = "AI: Focus CLI" },
+			{ "<leader>aa", function() require("sidekick.cli").toggle({ name = "codex", focus = true }) end, desc = "AI: Toggle Codex" },
+			{ "<leader>as", function() require("sidekick.cli").select() end, desc = "AI: Select CLI Tool" },
+			{ "<leader>ad", function() require("sidekick.cli").close() end, desc = "AI: Detach Session" },
+			{ "<leader>at", function() require("sidekick.cli").send({ msg = "{this}" }) end, mode = { "n", "x" }, desc = "AI: Send This" },
+			{ "<leader>af", function() require("sidekick.cli").send({ msg = "{file}" }) end, desc = "AI: Send File" },
+			{ "<leader>av", function() require("sidekick.cli").send({ msg = "{selection}" }) end, mode = { "x" }, desc = "AI: Send Selection" },
+			{ "<leader>ap", function() require("sidekick.cli").prompt() end, mode = { "n", "x" }, desc = "AI: Prompt Picker" },
+		},
+		opts = function() return require("codesensei.core.plugin_configs.sidekick") end,
+	},
+
+	-- ── Snacks.nvim — QoL utilities ───────────────────────────────
+	{
+		"folke/snacks.nvim",
+		priority = 1000,
+		lazy = false,
+		opts = function() return require("codesensei.core.plugin_configs.snacks") end,
+	},
+
 	--Nvim lint
+	--[[
 	{
 		"mfussenegger/nvim-lint",
 	},
+    ]]
+	--
 
 	--LspKind
 	{ "onsails/lspkind.nvim" },
 
-	--[[ Code COmpanion AI
+	--[[ Code Companion AI (commented — using sidekick+Codex instead)
 	{
 		"olimorris/codecompanion.nvim",
 		dependencies = {
