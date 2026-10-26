@@ -77,28 +77,30 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			return
 		end
 		local bufnr = ev.buf
-		local opts = { buffer = bufnr, silent = true }
+		local function map(lhs, rhs, desc)
+			vim.keymap.set("n", lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
+		end
 
 		-- Navigation
-		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-		vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-		vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-		vim.keymap.set("n", "go", vim.lsp.buf.type_definition, opts)
-		vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+		map("gd", vim.lsp.buf.definition, "Go to definition")
+		map("gD", vim.lsp.buf.declaration, "Go to declaration")
+		map("gi", vim.lsp.buf.implementation, "Go to implementation")
+		map("go", vim.lsp.buf.type_definition, "Go to type definition")
+		map("gr", vim.lsp.buf.references, "List references")
 
 		-- Info
-		vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+		map("K", vim.lsp.buf.hover, "Hover documentation")
 
 		-- Workspace actions
-		vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-		vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-		vim.keymap.set("n", "<leader>f", function()
-			vim.lsp.buf.format({ async = true })
-		end, opts)
+		map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+		map("<leader>ca", vim.lsp.buf.code_action, "Code action")
+		map("<leader>f", function()
+			require("conform").format({ bufnr = bufnr, async = true, lsp_format = "fallback" })
+		end, "Format buffer")
 
 		-- Diagnostics navigation
-		vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-		vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+		map("[d", vim.diagnostic.goto_prev, "Previous diagnostic")
+		map("]d", vim.diagnostic.goto_next, "Next diagnostic")
 
 		-- Highlight references on cursor hold
 		if client.server_capabilities.documentHighlightProvider then

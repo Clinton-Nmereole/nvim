@@ -55,17 +55,6 @@ return {
     silent = true,
   },
 
-  -- ── mini.pairs — auto-close brackets, quotes, etc. ────────────────────
-  pairs = {
-    modes = { insert = true, command = false, terminal = false },
-    -- Global skip pattern
-    skip_next = [=[[%w%.%]']>]=],
-    -- Skip paired character inside these filetypes
-    skip_ts = { "string" },
-    -- Unbalanced pairs
-    markdown = true,
-  },
-
   -- ── mini.comment — fast comment toggling ─────────────────────────────
   comment = {
     -- Whether to ignore blank lines when commenting

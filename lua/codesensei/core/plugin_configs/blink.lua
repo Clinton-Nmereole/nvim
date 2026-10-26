@@ -243,8 +243,4 @@ pcall(function()
 	require("codesensei.core.plugin_configs.lsp").setup()
 end)
 
--- ── Autopairs integration ────────────────────────────────────────────
--- Wire up nvim-autopairs to blink's completion accept event
-pcall(function()
-	require("nvim-autopairs.completion.blink").setup()
-end)
+-- Blink handles completion brackets; nvim-autopairs handles typed pairs.

@@ -1,128 +1,128 @@
 local keyset = vim.keymap.set
 
 --Window keymaps
-keyset("n", "<leader>sv", "<C-w>v")      -- split windows vertically
-keyset("n", "<leader>sh", "<C-w>s")      -- split windows horizontally
-keyset("n", "<leader>se", "<C-w>=")      -- make split windows equal
-keyset("n", "<leader>sx", ":close<CR>")  -- close current split window
+keyset("n", "<leader>sv", "<C-w>v", { desc = "Split vertically" })      -- split windows vertically
+keyset("n", "<leader>sh", "<C-w>s", { desc = "Split horizontally" })      -- split windows horizontally
+keyset("n", "<leader>se", "<C-w>=", { desc = "Equalize splits" })      -- make split windows equal
+keyset("n", "<leader>sx", ":close<CR>", { desc = "Close split" })  -- close current split window
 
-keyset("n", "<leader>to", ":tabnew<CR>") -- open new tab
+keyset("n", "<leader>to", ":tabnew<CR>", { desc = "New tab" }) -- open new tab
 --keyset("n", "<leader>tx", ":tabclose<CR>") -- close current tab
-keyset("n", "<leader>tn", ":tabn<CR>")   -- go to next tab
-keyset("n", "<leader>tp", ":tabp<CR>")   -- go to previous tab
-keyset("n", "<leader>h", "<C-w>h")       --move cursor left
-keyset("n", "<leader>l", "<C-w>l")       --move cursor right
-keyset("n", "<leader>mu", "<C-w>k")      --split window up horizontally
-keyset("n", "<leader>md", "<C-w>j")      --split window down horizontally
+keyset("n", "<leader>tn", ":tabn<CR>", { desc = "Next tab" })   -- go to next tab
+keyset("n", "<leader>tp", ":tabp<CR>", { desc = "Previous tab" })   -- go to previous tab
+keyset("n", "<leader>h", "<C-w>h", { desc = "Focus left window" })       --move cursor left
+keyset("n", "<leader>l", "<C-w>l", { desc = "Focus right window" })       --move cursor right
+keyset("n", "<leader>mu", "<C-w>k", { desc = "Focus upper window" })      --split window up horizontally
+keyset("n", "<leader>md", "<C-w>j", { desc = "Focus lower window" })      --split window down horizontally
 
-keyset("n", "<leader>1", ":Run<CR>", { silent = true })
-keyset("n", "<leader>2", ":Build<CR>", { silent = true })
-keyset("n", "<leader>3", ":Test<CR>", { silent = true })
-keyset("n", "<leader>4", ":Go<CR>", { silent = true })
+keyset("n", "<leader>1", ":Run<CR>", { silent = true, desc = "Run program" })
+keyset("n", "<leader>2", ":Build<CR>", { silent = true, desc = "Build to quickfix" })
+keyset("n", "<leader>3", ":Test<CR>", { silent = true, desc = "Test to quickfix" })
+keyset("n", "<leader>4", ":Go<CR>", { silent = true, desc = "Run Go project" })
 
-keyset("n", "<leader>5", ":Execute<CR>", { silent = true })
+keyset("n", "<leader>5", ":Execute<CR>", { silent = true, desc = "Execute binary" })
 
-keyset("n", "<leader>th", ":ColorMe<CR>")
+keyset("n", "<leader>th", ":ColorMe<CR>", { desc = "Choose colorscheme" })
 
 --Select all text
-keyset("n", "<leader>sa", "ggVG")
+keyset("n", "<leader>sa", "ggVG", { desc = "Select all" })
 
 --Bufferline
-keyset("n", "<Tab>", ":BufferLineCycleNext<CR>", { silent = true })
-keyset("n", "<S-Tab>", ":BufferLineCyclePrev<CR>", { silent = true })
+keyset("n", "<Tab>", ":BufferLineCycleNext<CR>", { silent = true, desc = "Next buffer" })
+keyset("n", "<S-Tab>", ":BufferLineCyclePrev<CR>", { silent = true, desc = "Previous buffer" })
 keyset("n", "<leader>x", function()
     vim.cmd("bd")
     vim.cmd("bNext")
-end)
+end, { desc = "Close buffer" })
 
 --Undotree
-keyset("n", "<leader>ut", ":UndotreeToggle<CR>", { silent = true })
+keyset("n", "<leader>ut", ":UndotreeToggle<CR>", { silent = true, desc = "Toggle undo history" })
 
 --Spectre Search and Replace
 local spectre = require("spectre")
 keyset("n", "<leader>sr", function()
     spectre.toggle()
-end)
+end, { desc = "Toggle search and replace" })
 keyset("n", "<leader>sf", function()
     spectre.open_file_search({ selected_word = false })
-end)
+end, { desc = "Replace in current file" })
 keyset("n", "<leader>ss", function()
     spectre.open()
-end)
+end, { desc = "Search and replace" })
 
 --LazyGit
-keyset("n", "<leader>lg", ":LazyGit<CR>", { silent = true })
+keyset("n", "<leader>lg", ":LazyGit<CR>", { silent = true, desc = "Open LazyGit" })
 
 --NvimTree
-keyset("n", "<leader>nt", ":NvimTreeToggle<CR>")
-keyset("n", "<leader>nf", ":NvimTreeFocus<CR>")
+keyset("n", "<leader>nt", ":NvimTreeToggle<CR>", { desc = "Toggle file tree" })
+keyset("n", "<leader>nf", ":NvimTreeFocus<CR>", { desc = "Focus file tree" })
 
 --vim diagnostic
-keyset("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>")
+keyset("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "Show line diagnostics" })
 
 --Lsplines
 local lsplines = require("lsp_lines")
 keyset("n", "<leader>ll", function()
     lsplines.toggle()
-end)
+end, { desc = "Toggle diagnostic lines" })
 
 --Trouble
 -- Lua
 keyset("n", "<leader>xx", function()
     require("trouble").toggle()
-end)
+end, { desc = "Toggle Trouble" })
 keyset("n", "<leader>xb", function()
     require("trouble").filter("diagnostics", { buf = 0 })
-end)
+end, { desc = "Filter buffer diagnostics" })
 keyset("n", "<leader>xd", function()
     require("trouble").toggle("diagnostics")
-end)
+end, { desc = "Workspace diagnostics" })
 keyset("n", "<leader>xq", function()
     require("trouble").toggle("quickfix")
-end)
+end, { desc = "Quickfix list" })
 keyset("n", "<leader>xl", function()
     require("trouble").toggle("loclist")
-end)
+end, { desc = "Location list" })
 keyset("n", "gR", function()
     require("trouble").toggle("lsp_references")
-end)
+end, { desc = "LSP references in Trouble" })
 
 keyset("n", "<leader>xp", function()
     require("trouble").toggle("lsp_definitions")
-end)
+end, { desc = "LSP definitions in Trouble" })
 
 --Keymap for Just File commands
-keyset("n", "<leader>jb", ":Justbuild<CR>")
-keyset("n", "<leader>jr", ":Justrun<CR>")
+keyset("n", "<leader>jb", ":Justbuild<CR>", { desc = "Just build to quickfix" })
+keyset("n", "<leader>jr", ":Justrun<CR>", { desc = "Just run" })
 
 --Keymap for Makefile commands
-keyset("n", "<leader>mb", ":Makefile<CR>")
-keyset("n", "<leader>mr", ":Makerun<CR>")
+keyset("n", "<leader>mb", ":Makefile<CR>", { desc = "Make build to quickfix" })
+keyset("n", "<leader>mr", ":Makerun<CR>", { desc = "Make run" })
 
 --Debugging
-keyset("n", "<leader>db", ":DapToggleBreakpoint<CR>")
-keyset("n", "<leader>dc", ":DapContinue<CR>")
-keyset("n", "<leader>di", ":DapStepInto<CR>")
-keyset("n", "<leader>do", ":DapStepOver<CR>")
-keyset("n", "<leader>dO", ":DapStepOut<CR>")
-keyset("n", "<leader>dr", ":DapToggleRepl<CR>")
+keyset("n", "<leader>db", ":DapToggleBreakpoint<CR>", { desc = "Toggle breakpoint" })
+keyset("n", "<leader>dc", ":DapContinue<CR>", { desc = "Continue debugging" })
+keyset("n", "<leader>di", ":DapStepInto<CR>", { desc = "Step into" })
+keyset("n", "<leader>do", ":DapStepOver<CR>", { desc = "Step over" })
+keyset("n", "<leader>dO", ":DapStepOut<CR>", { desc = "Step out" })
+keyset("n", "<leader>dr", ":DapToggleRepl<CR>", { desc = "Toggle debug REPL" })
 
-keyset("n", "<leader>dt", ":DapTerminate<CR>")
+keyset("n", "<leader>dt", ":DapTerminate<CR>", { desc = "Terminate debugging" })
 
 keyset("n", "<leader>dus", function()
     local widgets = require("dap.ui.widgets")
     local sidebar = widgets.sidebar(widgets.scopes)
     sidebar.open()
-end)
+end, { desc = "Show debug scopes" })
 
-keyset("n", "<leader>ro", ":term nu --login -c runodin<CR>")
+keyset("n", "<leader>ro", ":term nu --login -c runodin<CR>", { desc = "Run Odin with Nushell" })
 
 --PI Agent Keymaps
 --Open/close pi chat panel
 --keyset("n", "<leader>aa", require("pi-nvim").toggle, { desc = "Toggle Pi (chat)" })
 
 -- Treesitter enable highlights.
-keyset("n", "<leader>te", ":TSEnable highlight<CR>")
+keyset("n", "<leader>te", ":TSEnable highlight<CR>", { desc = "Enable Treesitter highlighting" })
 
 -- ============================================================================
 -- OIL.NVIM -- File explorer as a regular buffer
@@ -176,10 +176,10 @@ keyset("n", "<leader>te", ":TSEnable highlight<CR>")
 -- ============================================================================
 -- Manual format keymaps:
 keyset("n", "<leader>fm", function()
-    require("conform").format({ async = true, lsp_fallback = true })
+    require("conform").format({ async = true, lsp_format = "fallback" })
 end, { desc = "Format buffer" })
 keyset("v", "<leader>fm", function()
-    require("conform").format({ async = true, lsp_fallback = true })
+    require("conform").format({ async = true, lsp_format = "fallback" })
 end, { desc = "Format selection" })
 
 -- ============================================================================
@@ -224,7 +224,7 @@ keyset("n", "<leader>uk", ":ShowkeysToggle<CR>", { desc = "Toggle Showkeys Overl
 --   vii / vai     -> Select inside / around indent scope
 -- mini.cursorword: auto-highlights word under cursor (delay: 100ms)
 -- mini.trailspace: auto-highlights trailing whitespace
--- mini.pairs: auto-closes brackets, quotes (insert mode)
+-- nvim-autopairs handles typed brackets and quotes; Blink handles completion brackets.
 
 -- ============================================================================
 -- GITSIGNS.NVIM -- Git gutter signs, blame, hunk nav
@@ -272,7 +272,8 @@ end, { desc = "Dismiss Notifications" })
 keyset("n", "<leader>uz", function()
     require("snacks").zen.toggle()
 end, { desc = "Toggle Zen Mode" })
--- snacks.indent, snacks.scroll, snacks.words, snacks.bigfile: automatic (no keymaps)
+-- snacks.scroll, snacks.words, snacks.bigfile: automatic (no keymaps)
+-- Indent guides: indent-blankline; scope motions/text objects: mini.indentscope.
 
 -- ============================================================================
 -- MINUET-AI.NVIM -- AI code completions via OpenRouter DeepSeek (free)

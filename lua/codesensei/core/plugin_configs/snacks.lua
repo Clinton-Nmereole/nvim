@@ -116,40 +116,8 @@ return {
     },
   },
 
-  -- ── snacks.indent — indent guides ────────────────────────────────────
-  indent = {
-    enabled = true,
-    indent = {
-      char = "│",
-      only_scope = false,
-      only_current = false,
-    },
-    scope = {
-      char = "│",
-      only_current = false,
-      priority = 200,
-    },
-    animate = {
-      enabled = true,
-      style = "out",
-      easing = "linear",
-      duration = {
-        step = 20,
-        total = 250,
-      },
-    },
-    -- Chunk indentation by scope (e.g., functions, if blocks)
-    chunk = {
-      enabled = true,
-      char = {
-        corner_top = "╭",
-        corner_bottom = "╰",
-        horizontal = "─",
-        vertical = "│",
-        arrow = ">",
-      },
-    },
-  },
+  -- Indent guides and scope highlighting are owned by indent-blankline.
+  indent = { enabled = false },
 
   -- ── snacks.scroll — smooth scrolling ─────────────────────────────────
   scroll = {

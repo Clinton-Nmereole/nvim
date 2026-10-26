@@ -48,8 +48,9 @@ local M = {
 			local mini_config = require("codesensei.core.plugin_configs.mini")
 			require("mini.ai").setup(mini_config.ai)
 			require("mini.surround").setup(mini_config.surround)
-			require("mini.pairs").setup(mini_config.pairs)
 			require("mini.comment").setup(mini_config.comment)
+			-- Keep scope motions/text objects; indent-blankline owns drawing.
+			vim.g.miniindentscope_disable = true
 			require("mini.indentscope").setup(mini_config.indentscope)
 			require("mini.cursorword").setup(mini_config.cursorword)
 			require("mini.trailspace").setup(mini_config.trailspace)
@@ -176,30 +177,6 @@ local M = {
 		config = function()
 			require("codesensei.core.plugin_configs.blink")
 		end,
-	},
-
-	-- Sidekick — AI assistant powered by Codex CLI (included with ChatGPT Pro)
-	{
-		"folke/sidekick.nvim",
-		dependencies = {
-			"folke/snacks.nvim",
-			"ibhagwan/fzf-lua",
-		},
-		opts = function() return require("codesensei.core.plugin_configs.sidekick") end,
-		cmd = {
-			"Sidekick",
-			"SidekickChat",
-			"SidekickReview",
-			"SidekickAgent",
-			"SidekickInline",
-			"SidekickCode",
-		},
-		keys = {
-			{ "<leader>ak", "<cmd>Sidekick<CR>", desc = "Sidekick: Ask" },
-			{ "<leader>ac", "<cmd>SidekickChat<CR>", desc = "Sidekick: Chat" },
-			{ "<leader>ar", "<cmd>SidekickReview<CR>", desc = "Sidekick: Review" },
-			{ "<leader>aa", "<cmd>SidekickAgent<CR>", desc = "Sidekick: Agent" },
-		},
 	},
 
 	--Lsp-Lines
@@ -333,11 +310,11 @@ local M = {
 		"windwp/nvim-autopairs",
 		opts = {
 			fast_wrap = {},
-			disable_filetype = { "TelescopePrompt", "vim" },
+			disable_filetype = { "TelescopePrompt", "snacks_picker_input", "spectre_panel", "vim" },
 		},
 		config = function(_, opts)
 			require("nvim-autopairs").setup(opts)
-			-- Blink autopairs integration is handled in codesensei.core.plugin_configs.blink
+			-- Blink handles brackets for accepted completions itself.
 		end,
 	},
 
@@ -433,7 +410,7 @@ local M = {
 		"rust-lang/rust.vim",
 		ft = "rust",
 		init = function()
-			vim.g.rustfmt_autosave = 1
+			vim.g.rustfmt_autosave = 0 -- Conform owns format-on-save
 		end,
 	},
 
@@ -522,9 +499,23 @@ local M = {
 			vim.o.timeoutlen = 300
 		end,
 		opts = {
-			-- your configuration comes here
-			-- or leave it empty to use the default settings
-			-- refer to the configuration section below
+			spec = {
+				{ "<leader>a", group = "AI / Harpoon", mode = { "n", "x" } },
+				{ "<leader>c", group = "Code" },
+				{ "<leader>d", group = "Debug" },
+				{ "<leader>du", group = "Debug windows" },
+				{ "<leader>f", group = "Files / format", mode = { "n", "x" } },
+				{ "<leader>h", group = "Git hunks", mode = { "n", "x" } },
+				{ "<leader>j", group = "Just tasks" },
+				{ "<leader>l", group = "Git / diagnostics" },
+				{ "<leader>m", group = "Make / windows" },
+				{ "<leader>n", group = "File tree" },
+				{ "<leader>r", group = "Rename / run" },
+				{ "<leader>s", group = "Search / splits" },
+				{ "<leader>t", group = "Tabs / toggles" },
+				{ "<leader>u", group = "UI" },
+				{ "<leader>x", group = "Diagnostics / lists" },
+			},
 		},
 	},
 
@@ -698,6 +689,9 @@ local M = {
 			{ "<c-.>", function() require("sidekick.cli").focus() end, mode = { "n", "t", "i" }, desc = "AI: Focus CLI" },
 			{ "<leader>aa", function() require("sidekick.cli").toggle({ name = "codex", focus = true }) end, desc = "AI: Toggle Codex" },
 			{ "<leader>as", function() require("sidekick.cli").select() end, desc = "AI: Select CLI Tool" },
+			{ "<leader>ak", function() require("sidekick.cli").prompt() end, desc = "AI: Ask with Prompt" },
+			{ "<leader>ac", function() require("sidekick.cli").toggle({ name = "codex", focus = true }) end, desc = "AI: Chat with Codex" },
+			{ "<leader>ar", function() require("sidekick.cli").send({ msg = "review" }) end, desc = "AI: Review File" },
 			{ "<leader>ad", function() require("sidekick.cli").close() end, desc = "AI: Detach Session" },
 			{ "<leader>at", function() require("sidekick.cli").send({ msg = "{this}" }) end, mode = { "n", "x" }, desc = "AI: Send This" },
 			{ "<leader>af", function() require("sidekick.cli").send({ msg = "{file}" }) end, desc = "AI: Send File" },

@@ -2,11 +2,11 @@ local mark = require("harpoon.mark")
 local ui = require("harpoon.ui")
 local keymap = vim.keymap
 
-keymap.set("n", "<leader>a", mark.add_file)
-keymap.set("n", "<C-e>", ui.toggle_quick_menu)
+keymap.set("n", "<leader>a", mark.add_file, { desc = "Harpoon: Add file" })
+keymap.set("n", "<C-e>", ui.toggle_quick_menu, { desc = "Harpoon: File menu" })
 
 --file navigation
-keymap.set("n", "<C-1>", function() ui.nav_file(1) end)
-keymap.set("n", "<C-2>", function() ui.nav_file(2) end)
-keymap.set("n", "<C-3>", function() ui.nav_file(3) end)
-keymap.set("n", "<C-4>", function() ui.nav_file(4) end)
+keymap.set("n", "<C-1>", function() ui.nav_file(1) end, { desc = "Harpoon: File 1" })
+keymap.set("n", "<C-2>", function() ui.nav_file(2) end, { desc = "Harpoon: File 2" })
+keymap.set("n", "<C-3>", function() ui.nav_file(3) end, { desc = "Harpoon: File 3" })
+keymap.set("n", "<C-4>", function() ui.nav_file(4) end, { desc = "Harpoon: File 4" })

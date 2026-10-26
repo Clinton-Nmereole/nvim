@@ -19,7 +19,7 @@ return {
     css = { "prettierd", "prettier", stop_after_first = true },
     scss = { "prettierd", "prettier", stop_after_first = true },
     -- Go
-    go = { "gofumpt", "goimports-reviser" },
+    go = { "gofumpt", "goimports-reviser", "golines" },
     gomod = { "goimports-reviser" },
     -- Rust
     rust = { "rustfmt", lsp_format = "fallback" },
@@ -44,8 +44,13 @@ return {
     nix = { "nixfmt" },
   },
 
-  -- Format-on-save (async — runs after save, doesn't block)
-  format_after_save = function(bufnr)
+  default_format_opts = { lsp_format = "fallback" },
+
+  -- Format once, before writing, so builds and tools see the formatted file.
+  format_on_save = function(bufnr)
+    if vim.bo[bufnr].buftype ~= "" or not vim.bo[bufnr].modifiable then
+      return
+    end
     -- Disable format on save for files > 1MB
     local max_file_size = 1024 * 1024
     if vim.api.nvim_buf_get_offset(bufnr, vim.api.nvim_buf_line_count(bufnr)) > max_file_size then
@@ -59,8 +64,7 @@ return {
 
     return {
       timeout_ms = 2000,
-      lsp_fallback = true,
-      async = true,
+      lsp_format = "fallback",
       quiet = false,
     }
   end,
@@ -76,7 +80,7 @@ return {
     stylua = {
       prepend_args = {
         "--indent-type",
-        "Tabs",
+        "Spaces",
         "--indent-width",
         "4",
       },
@@ -89,5 +93,5 @@ return {
   log_level = vim.log.levels.WARN,
 
   -- Keymap for manual formatting
-  -- (set in keymaps.lua: <leader>fm to format, <leader>fM to format range)
+  -- (set in keymaps.lua: <leader>fm in normal or visual mode)
 }
